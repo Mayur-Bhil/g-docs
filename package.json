@@ -49,6 +49,7 @@
     "@tiptap/extension-task-item": "^2.1.13",
     "@tiptap/extension-task-list": "^2.1.13",
     "@tiptap/extension-text": "2.10.2",
+    "@tiptap/extension-underline": "^3.20.0",
     "@tiptap/pm": "^2.1.13",
     "@tiptap/react": "^2.1.13",
     "@tiptap/starter-kit": "^2.1.13",
@@ -73,7 +74,8 @@
     "tailwind-merge": "^3.4.0",
     "tiptap-extension-resize-image": "^1.2.1",
     "vaul": "^1.1.2",
-    "zod": "^4.3.6"
+    "zod": "^4.3.6",
+    "zustand": "^5.0.11"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
