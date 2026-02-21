@@ -10,6 +10,12 @@ import TableHeader from '@tiptap/extension-table-header';
 import TableCell from '@tiptap/extension-table-cell';
 import ImageResize from 'tiptap-extension-resize-image';
 import { useEditorStore } from '@/store/use-editor-store';
+import FontFamily from '@tiptap/extension-font-family';
+import { TextStyle } from '@tiptap/extension-text-style';
+import { DropdownMenu } from '@/components/ui/dropdown-menu';
+import { DropdownMenuContent, DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
+import { ChevronDownIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 
 export const EditorPage = () => {
@@ -49,6 +55,8 @@ export const EditorPage = () => {
     },
     extensions: [
       StarterKit,
+      FontFamily,
+      TextStyle,
       Underline,       
       ImageResize,       // ✅ Image removed, only ImageResize
       Table,
