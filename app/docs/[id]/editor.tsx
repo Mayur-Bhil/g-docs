@@ -16,7 +16,7 @@ import TextAlign from '@tiptap/extension-text-align';
 import Highlight from '@tiptap/extension-highlight';
 import Link from '@tiptap/extension-link';
 import { useEditorStore } from '@/store/use-editor-store';
-import { Editor, Extension } from '@tiptap/core';
+import { Extension } from '@tiptap/core';
 
 // Custom FontSize Extension
 export type FontSizeOptions = {
