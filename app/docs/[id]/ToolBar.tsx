@@ -21,6 +21,19 @@ import {
   ChevronDown,
   Palette,
   Highlighter,
+  Table2,
+  Columns,
+  Rows,
+  Plus,
+  Minus,
+  Trash2,
+  Code,
+  Quote,
+  Superscript,
+  Subscript,
+  RemoveFormatting,
+  Divide,
+  MessageSquare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEditorStore } from "@/store/use-editor-store";
@@ -42,11 +55,11 @@ const ToolBarButton = ({ onClick, isActive, icon: Icon }: ToolBarButtonProps) =>
     <button
       onClick={onClick}
       className={cn(
-        "h-7 min-w-7 flex items-center justify-center rounded-sm hover:bg-[#d3e3fd] transition-colors",
+        "h-7 min-w-7 flex items-center justify-center rounded-sm hover:bg-[#d3e3fd] transition-colors px-1.5",
         isActive && "bg-[#c2e7ff]"
       )}
     >
-      <Icon className="w-[18px] h-[18px] text-[#444746]" />
+      <Icon className="w-4 h-4 text-[#444746]" />
     </button>
   );
 };
@@ -73,11 +86,11 @@ const HeadingLevelButton = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="h-7 w-[110px] shrink-0 flex items-center justify-between rounded-sm hover:bg-[#d3e3fd] px-2 text-sm transition-colors">
-          <span className='truncate text-[#444746] text-[13px]'>
+        <button className="h-7 w-[100px] shrink-0 flex items-center justify-between rounded-sm hover:bg-[#d3e3fd] px-2 text-sm transition-colors">
+          <span className='truncate text-[#444746] text-xs'>
             {getCurrentHeading()}
           </span>
-          <ChevronDown className='ml-2 w-4 h-4 shrink-0 text-[#444746]'/>
+          <ChevronDown className='ml-1 w-3.5 h-3.5 shrink-0 text-[#444746]'/>
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className='p-1 flex flex-col gap-y-1 bg-white rounded-sm shadow-[0_2px_6px_2px_rgba(0,0,0,0.15)] min-w-[200px] z-50'>
@@ -139,11 +152,11 @@ const FontSizeButton = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="h-7 w-[65px] shrink-0 flex items-center justify-between rounded-sm hover:bg-[#d3e3fd] px-2 text-sm transition-colors">
-          <span className='truncate text-[#444746] text-[13px]'>
+        <button className="h-7 w-[55px] shrink-0 flex items-center justify-between rounded-sm hover:bg-[#d3e3fd] px-2 text-sm transition-colors">
+          <span className='truncate text-[#444746] text-xs'>
             {getCurrentFontSize()}
           </span>
-          <ChevronDown className='ml-2 w-4 h-4 shrink-0 text-[#444746]'/>
+          <ChevronDown className='ml-1 w-3.5 h-3.5 shrink-0 text-[#444746]'/>
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className='p-1 flex flex-col gap-y-0.5 bg-white rounded-sm shadow-[0_2px_6px_2px_rgba(0,0,0,0.15)] min-w-[100px] max-h-[300px] overflow-y-auto z-50'>
@@ -159,6 +172,67 @@ const FontSizeButton = () => {
             <span className='text-[#444746]'>{label}</span>
           </button>
         ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+const LineHeightButton = () => {
+  const { editor } = useEditorStore();
+
+  const lineHeights = [
+    { label: 'Single', value: '1' },
+    { label: '1.15', value: '1.15' },
+    { label: '1.5', value: '1.5' },
+    { label: 'Double', value: '2' },
+    { label: '2.5', value: '2.5' },
+    { label: '3', value: '3' },
+  ];
+
+  const getCurrentLineHeight = () => {
+    const lineHeight = editor?.getAttributes('paragraph').lineHeight || 
+                       editor?.getAttributes('heading').lineHeight;
+    
+    if (lineHeight) {
+      const found = lineHeights.find((lh) => lh.value === lineHeight);
+      return found ? found.label : lineHeight;
+    }
+    return 'Normal';
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="h-7 w-[70px] shrink-0 flex items-center justify-between rounded-sm hover:bg-[#d3e3fd] px-2 text-sm transition-colors">
+          <span className='truncate text-[#444746] text-xs'>
+            {getCurrentLineHeight()}
+          </span>
+          <ChevronDown className='ml-1 w-3.5 h-3.5 shrink-0 text-[#444746]'/>
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className='p-1 flex flex-col gap-y-0.5 bg-white rounded-sm shadow-[0_2px_6px_2px_rgba(0,0,0,0.15)] min-w-[120px] z-50'>
+        {lineHeights.map(({ label, value }) => (
+          <button
+            onClick={() => editor?.chain().focus().setLineHeight(value).run()}
+            key={value}
+            className={cn(
+              "flex items-center justify-between px-3 py-2 rounded-sm hover:bg-[#f1f3f4] text-sm transition-colors text-left",
+              (editor?.getAttributes('paragraph').lineHeight === value ||
+                editor?.getAttributes('heading').lineHeight === value) &&
+                "bg-[#e8f0fe]"
+            )}
+          >
+            <span className='text-[#444746]'>{label}</span>
+            <span className='text-[#5f6368] text-xs'>{value}</span>
+          </button>
+        ))}
+        <div className="h-px bg-[#dadce0] my-1" />
+        <button
+          onClick={() => editor?.chain().focus().unsetLineHeight().run()}
+          className="w-full px-3 py-2 text-left text-sm rounded-sm hover:bg-[#f1f3f4] text-[#444746] transition-colors"
+        >
+          Reset to Normal
+        </button>
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -181,11 +255,11 @@ const FontFamilyButton = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="h-7 w-[130px] shrink-0 flex items-center justify-between rounded-sm hover:bg-[#d3e3fd] px-2 text-sm transition-colors">  
-          <span className='truncate text-[#444746] text-[13px]'>
+        <button className="h-7 w-[110px] shrink-0 flex items-center justify-between rounded-sm hover:bg-[#d3e3fd] px-2 text-sm transition-colors">  
+          <span className='truncate text-[#444746] text-xs'>
             {editor?.getAttributes("textStyle").fontFamily || "Arial"}
           </span>
-          <ChevronDown className='ml-2 w-4 h-4 shrink-0 text-[#444746]'/>
+          <ChevronDown className='ml-1 w-3.5 h-3.5 shrink-0 text-[#444746]'/>
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className='p-1 flex flex-col gap-y-0.5 bg-white rounded-sm shadow-[0_2px_6px_2px_rgba(0,0,0,0.15)] min-w-[180px] z-50'> 
@@ -206,7 +280,7 @@ const FontFamilyButton = () => {
   );
 };
 
-const TextColorButton = () => {
+const TextColorButton = () => { 
   const { editor } = useEditorStore();
 
   const value = editor?.getAttributes('textStyle').color || '#000000';
@@ -218,8 +292,8 @@ const TextColorButton = () => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="h-7 min-w-7 shrink-0 flex flex-col items-center justify-center rounded-sm hover:bg-[#d3e3fd] px-1 gap-0.5 transition-colors">
-          <Palette className='w-[18px] h-[18px] text-[#444746]' />
-          <div className="w-4 h-0.5 rounded" style={{ backgroundColor: value }} />
+          <Palette className='w-4 h-4 text-[#444746]' />
+          <div className="w-3 h-0.5 rounded" style={{ backgroundColor: value }} />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className='p-2.5 bg-white rounded-sm shadow-[0_2px_6px_2px_rgba(0,0,0,0.15)] z-50'>
@@ -268,8 +342,8 @@ const HighlightColorButton = () => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="h-7 min-w-7 shrink-0 flex flex-col items-center justify-center rounded-sm hover:bg-[#d3e3fd] px-1 gap-0.5 transition-colors">
-          <Highlighter className='w-[18px] h-[18px] text-[#444746]' />
-          <div className="w-4 h-0.5 bg-yellow-300 rounded" />
+          <Highlighter className='w-4 h-4 text-[#444746]' />
+          <div className="w-3 h-0.5 bg-yellow-300 rounded" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className='p-2 bg-white rounded-sm shadow-[0_2px_6px_2px_rgba(0,0,0,0.15)] z-50'>
@@ -400,13 +474,11 @@ const ImageButton = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Check if it's an image
     if (!file.type.startsWith('image/')) {
       alert('Please select an image file');
       return;
     }
 
-    // Check file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       alert('Image size should be less than 5MB');
       return;
@@ -414,7 +486,6 @@ const ImageButton = () => {
 
     setUploading(true);
 
-    // Convert to base64
     const reader = new FileReader();
     reader.onload = (event) => {
       const base64 = event.target?.result as string;
@@ -446,7 +517,7 @@ const ImageButton = () => {
         const dataTransfer = new DataTransfer();
         dataTransfer.items.add(file);
         input.files = dataTransfer.files;
-        handleFileSelect({ target: input } as any);
+        handleFileSelect({ target: input } as React.ChangeEvent<HTMLInputElement>);
       }
     }
   };
@@ -466,12 +537,10 @@ const ImageButton = () => {
       {isOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setIsOpen(false)}>
           <div className="bg-white rounded-lg shadow-xl w-[480px]" onClick={(e) => e.stopPropagation()}>
-            {/* Header */}
             <div className="px-5 pt-5 pb-3 border-b border-[#dadce0]">
               <h3 className="text-[#202124] text-base font-medium">Insert Image</h3>
             </div>
 
-            {/* Tabs */}
             <div className="flex border-b border-[#dadce0]">
               <button
                 onClick={() => setActiveTab('upload')}
@@ -503,7 +572,6 @@ const ImageButton = () => {
               </button>
             </div>
 
-            {/* Content */}
             <div className="p-5">
               {activeTab === 'upload' ? (
                 <div>
@@ -564,7 +632,6 @@ const ImageButton = () => {
               )}
             </div>
 
-            {/* Footer */}
             <div className="px-5 pb-5 flex items-center justify-end gap-2">
               <button
                 onClick={() => setIsOpen(false)}
@@ -590,154 +657,284 @@ const ImageButton = () => {
   );
 };
 
+const TableButton = () => {
+  const { editor } = useEditorStore();
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className={cn(
+          "h-7 min-w-7 flex items-center justify-center rounded-sm hover:bg-[#d3e3fd] transition-colors px-1.5",
+          editor?.isActive('table') && "bg-[#c2e7ff]"
+        )}>
+          <Table2 className="w-4 h-4 text-[#444746]" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className='p-2 bg-white rounded-sm shadow-[0_2px_6px_2px_rgba(0,0,0,0.15)] min-w-[200px] z-50'>
+        <div className="space-y-1">
+          <button
+            onClick={() => editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
+            className="w-full px-3 py-2 text-left text-sm rounded-sm hover:bg-[#f1f3f4] text-[#444746] transition-colors flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Insert 3×3 Table
+          </button>
+          
+          {editor?.isActive('table') && (
+            <>
+              <div className="h-px bg-[#dadce0] my-1" />
+              
+              <button
+                onClick={() => editor?.chain().focus().addColumnBefore().run()}
+                className="w-full px-3 py-2 text-left text-sm rounded-sm hover:bg-[#f1f3f4] text-[#444746] transition-colors flex items-center gap-2"
+              >
+                <Columns className="w-4 h-4" />
+                Add Column Before
+              </button>
+              
+              <button
+                onClick={() => editor?.chain().focus().addColumnAfter().run()}
+                className="w-full px-3 py-2 text-left text-sm rounded-sm hover:bg-[#f1f3f4] text-[#444746] transition-colors flex items-center gap-2"
+              >
+                <Columns className="w-4 h-4" />
+                Add Column After
+              </button>
+              
+              <button
+                onClick={() => editor?.chain().focus().addRowBefore().run()}
+                className="w-full px-3 py-2 text-left text-sm rounded-sm hover:bg-[#f1f3f4] text-[#444746] transition-colors flex items-center gap-2"
+              >
+                <Rows className="w-4 h-4" />
+                Add Row Before
+              </button>
+              
+              <button
+                onClick={() => editor?.chain().focus().addRowAfter().run()}
+                className="w-full px-3 py-2 text-left text-sm rounded-sm hover:bg-[#f1f3f4] text-[#444746] transition-colors flex items-center gap-2"
+              >
+                <Rows className="w-4 h-4" />
+                Add Row After
+              </button>
+              
+              <div className="h-px bg-[#dadce0] my-1" />
+              
+              <button
+                onClick={() => editor?.chain().focus().deleteColumn().run()}
+                className="w-full px-3 py-2 text-left text-sm rounded-sm hover:bg-[#fce8e6] text-[#d93025] transition-colors flex items-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete Column
+              </button>
+              
+              <button
+                onClick={() => editor?.chain().focus().deleteRow().run()}
+                className="w-full px-3 py-2 text-left text-sm rounded-sm hover:bg-[#fce8e6] text-[#d93025] transition-colors flex items-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete Row
+              </button>
+              
+              <button
+                onClick={() => editor?.chain().focus().deleteTable().run()}
+                className="w-full px-3 py-2 text-left text-sm rounded-sm hover:bg-[#fce8e6] text-[#d93025] transition-colors flex items-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete Table
+              </button>
+              
+              <div className="h-px bg-[#dadce0] my-1" />
+              
+              <button
+                onClick={() => editor?.chain().focus().mergeCells().run()}
+                className="w-full px-3 py-2 text-left text-sm rounded-sm hover:bg-[#f1f3f4] text-[#444746] transition-colors"
+              >
+                Merge Cells
+              </button>
+              
+              <button
+                onClick={() => editor?.chain().focus().splitCell().run()}
+                className="w-full px-3 py-2 text-left text-sm rounded-sm hover:bg-[#f1f3f4] text-[#444746] transition-colors"
+              >
+                Split Cell
+              </button>
+            </>
+          )}
+        </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+const CommentButton = () => {
+  const handleCommentClick = () => {
+    alert('💬 Comments Feature\n\nThis feature will be available soon in the toolbar!\n\nStay tuned for updates.');
+  };
+
+  return (
+    <ToolBarButton
+      onClick={handleCommentClick}
+      isActive={false}
+      icon={MessageSquare}
+    />
+  );
+};
+
 export const ToolBar = () => {
   const { editor } = useEditorStore();
 
-  const sections: {
-    label: string;
-    icon: LucideIcon;
-    onClick: () => void;
-    isActive?: boolean;
-  }[][] = [
-    [
-      {
-        label: "Undo",
-        icon: Undo,
-        onClick: () => editor?.chain().focus().undo().run(),
-      },
-      {
-        label: "Redo",          
-        icon: Redo,
-        onClick: () => editor?.chain().focus().redo().run(),
-      },
-      {
-        label: "Print",
-        icon: Printer,
-        onClick: () => window.print(),
-      },
-    ],
-    [
-      {
-        label: "Bold",
-        icon: Bold,
-        onClick: () => editor?.chain().focus().toggleBold().run(),
-        isActive: editor?.isActive("bold"),
-      },
-      {
-        label: "Italic",
-        icon: Italic,
-        onClick: () => editor?.chain().focus().toggleItalic().run(),
-        isActive: editor?.isActive("italic"),
-      },
-      {
-        label: "Underline",
-        icon: Underline,
-        onClick: () => editor?.chain().focus().toggleUnderline().run(),
-        isActive: editor?.isActive("underline"),
-      },
-      {
-        label: "Strikethrough",
-        icon: Strikethrough,
-        onClick: () => editor?.chain().focus().toggleStrike().run(),
-        isActive: editor?.isActive("strike"),
-      },
-    ],
-    [
-      {
-        label: "Align Left",
-        icon: AlignLeft,
-        onClick: () => editor?.chain().focus().setTextAlign('left').run(),
-        isActive: editor?.isActive({ textAlign: 'left' }),
-      },
-      {
-        label: "Align Center",
-        icon: AlignCenter,
-        onClick: () => editor?.chain().focus().setTextAlign('center').run(),
-        isActive: editor?.isActive({ textAlign: 'center' }),
-      },
-      {
-        label: "Align Right",
-        icon: AlignRight,
-        onClick: () => editor?.chain().focus().setTextAlign('right').run(),
-        isActive: editor?.isActive({ textAlign: 'right' }),
-      },
-      {
-        label: "Align Justify",
-        icon: AlignJustify,
-        onClick: () => editor?.chain().focus().setTextAlign('justify').run(),
-        isActive: editor?.isActive({ textAlign: 'justify' }),
-      },
-    ],
-    [
-      {
-        label: "Bullet List",
-        icon: List,
-        onClick: () => editor?.chain().focus().toggleBulletList().run(),
-        isActive: editor?.isActive("bulletList"),
-      },
-      {
-        label: "Ordered List",
-        icon: ListOrdered,
-        onClick: () => editor?.chain().focus().toggleOrderedList().run(),
-        isActive: editor?.isActive("orderedList"),
-      },
-      {
-        label: "Task List",
-        icon: ListTodo,
-        onClick: () => editor?.chain().focus().toggleTaskList().run(),
-        isActive: editor?.isActive("taskList"),
-      },
-    ],
-  ];
-
   return (
-    <div className="bg-[#f9fbfd] px-2.5 py-1 min-h-[44px] flex items-center gap-0.5 overflow-x-auto border-b border-[#dadce0] print:hidden">
-      {/* History & Print */}
-      {sections[0].map((section) => (
-        <ToolBarButton key={section.label} {...section} />
-      ))}
+    <div className="bg-[#f9fbfd] px-2.5 py-1.5 min-h-[40px] flex items-center gap-0.5 overflow-x-auto border-b border-[#dadce0] print:hidden">
+      {/* Undo/Redo/Print */}
+      <ToolBarButton
+        onClick={() => editor?.chain().focus().undo().run()}
+        icon={Undo}
+      />
+      <ToolBarButton
+        onClick={() => editor?.chain().focus().redo().run()}
+        icon={Redo}
+      />
+      <ToolBarButton
+        onClick={() => window.print()}
+        icon={Printer}
+      />
       
-      <Separator orientation="vertical" className="h-5 w-px bg-[#dadce0] mx-0.5"/>
+      <Separator orientation="vertical" className="h-4 w-px bg-[#dadce0] mx-1"/>
       
       {/* Heading, Font & Size */}
       <HeadingLevelButton/>
-      <Separator orientation="vertical" className="h-5 w-px bg-[#dadce0] mx-0.5"/>
       <FontFamilyButton/>
-      <Separator orientation="vertical" className="h-5 w-px bg-[#dadce0] mx-0.5"/>
       <FontSizeButton/>
+      <LineHeightButton/>
       
-      <Separator orientation="vertical" className="h-5 w-px bg-[#dadce0] mx-0.5"/>
+      <Separator orientation="vertical" className="h-4 w-px bg-[#dadce0] mx-1"/>
       
-      {/* Text Formatting */}
-      {sections[1].map((section) => (  
-        <ToolBarButton key={section.label} {...section} />
-      ))}
+      {/* Basic Text Formatting */}
+      <ToolBarButton
+        onClick={() => editor?.chain().focus().toggleBold().run()}
+        isActive={editor?.isActive("bold")}
+        icon={Bold}
+      />
+      <ToolBarButton
+        onClick={() => editor?.chain().focus().toggleItalic().run()}
+        isActive={editor?.isActive("italic")}
+        icon={Italic}
+      />
+      <ToolBarButton
+        onClick={() => editor?.chain().focus().toggleUnderline().run()}
+        isActive={editor?.isActive("underline")}
+        icon={Underline}
+      />
+      <ToolBarButton
+        onClick={() => editor?.chain().focus().toggleStrike().run()}
+        isActive={editor?.isActive("strike")}
+        icon={Strikethrough}
+      />
       
-      <Separator orientation="vertical" className="h-5 w-px bg-[#dadce0] mx-0.5"/>
+      <Separator orientation="vertical" className="h-4 w-px bg-[#dadce0] mx-1"/>
       
       {/* Text & Highlight Color */}
       <TextColorButton />
       <HighlightColorButton />
       
-      <Separator orientation="vertical" className="h-5 w-px bg-[#dadce0] mx-0.5"/>
+      <Separator orientation="vertical" className="h-4 w-px bg-[#dadce0] mx-1"/>
       
-      {/* Link & Image */}
+      {/* Advanced Formatting */}
+      <ToolBarButton
+        onClick={() => editor?.chain().focus().toggleCode().run()}
+        isActive={editor?.isActive("code")}
+        icon={Code}
+      />
+      <ToolBarButton
+        onClick={() => editor?.chain().focus().toggleCodeBlock().run()}
+        isActive={editor?.isActive("codeBlock")}
+        icon={Code}
+      />
+      <ToolBarButton
+        onClick={() => editor?.chain().focus().toggleBlockquote().run()}
+        isActive={editor?.isActive("blockquote")}
+        icon={Quote}
+      />
+      
+      <Separator orientation="vertical" className="h-4 w-px bg-[#dadce0] mx-1"/>
+      
+      {/* Super/Subscript */}
+      <ToolBarButton
+        onClick={() => editor?.chain().focus().toggleSuperscript().run()}
+        isActive={editor?.isActive("superscript")}
+        icon={Superscript}
+      />
+      <ToolBarButton
+        onClick={() => editor?.chain().focus().toggleSubscript().run()}
+        isActive={editor?.isActive("subscript")}
+        icon={Subscript}
+      />
+      
+      <Separator orientation="vertical" className="h-4 w-px bg-[#dadce0] mx-1"/>
+      
+      {/* Link, Image, Table & Comment */}
       <LinkButton />
       <ImageButton />
+      <TableButton />
+      <CommentButton />
       
-      <Separator orientation="vertical" className="h-5 w-px bg-[#dadce0] mx-0.5"/>
+      <Separator orientation="vertical" className="h-4 w-px bg-[#dadce0] mx-1"/>
+      
+      {/* Horizontal Rule */}
+      <ToolBarButton
+        onClick={() => editor?.chain().focus().setHorizontalRule().run()}
+        icon={Divide}
+      />
+      
+      <Separator orientation="vertical" className="h-4 w-px bg-[#dadce0] mx-1"/>
       
       {/* Text Alignment */}
-      {sections[2].map((section) => (  
-        <ToolBarButton key={section.label} {...section} />
-      ))}
+      <ToolBarButton
+        onClick={() => editor?.chain().focus().setTextAlign('left').run()}
+        isActive={editor?.isActive({ textAlign: 'left' })}
+        icon={AlignLeft}
+      />
+      <ToolBarButton
+        onClick={() => editor?.chain().focus().setTextAlign('center').run()}
+        isActive={editor?.isActive({ textAlign: 'center' })}
+        icon={AlignCenter}
+      />
+      <ToolBarButton
+        onClick={() => editor?.chain().focus().setTextAlign('right').run()}
+        isActive={editor?.isActive({ textAlign: 'right' })}
+        icon={AlignRight}
+      />
+      <ToolBarButton
+        onClick={() => editor?.chain().focus().setTextAlign('justify').run()}
+        isActive={editor?.isActive({ textAlign: 'justify' })}
+        icon={AlignJustify}
+      />
       
-      <Separator orientation="vertical" className="h-5 w-px bg-[#dadce0] mx-0.5"/>
+      <Separator orientation="vertical" className="h-4 w-px bg-[#dadce0] mx-1"/>
       
       {/* Lists */}
-      {sections[3].map((section) => (  
-        <ToolBarButton key={section.label} {...section} />
-      ))}
+      <ToolBarButton
+        onClick={() => editor?.chain().focus().toggleBulletList().run()}
+        isActive={editor?.isActive("bulletList")}
+        icon={List}
+      />
+      <ToolBarButton
+        onClick={() => editor?.chain().focus().toggleOrderedList().run()}
+        isActive={editor?.isActive("orderedList")}
+        icon={ListOrdered}
+      />
+      <ToolBarButton
+        onClick={() => editor?.chain().focus().toggleTaskList().run()}
+        isActive={editor?.isActive("taskList")}
+        icon={ListTodo}
+      />
+      
+      <Separator orientation="vertical" className="h-4 w-px bg-[#dadce0] mx-1"/>
+      
+      {/* Clear Formatting */}
+      <ToolBarButton
+        onClick={() => editor?.chain().focus().clearNodes().unsetAllMarks().run()}
+        icon={RemoveFormatting}
+      />
     </div>
   );
 };

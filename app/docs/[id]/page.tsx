@@ -1,6 +1,8 @@
 
+import { Nav } from "react-day-picker";
 import EditorPage from "./editor";
 import ToolBar from "./ToolBar";
+import { Navbar } from "./Navbar";
 
 
 type PageProps = {
@@ -16,6 +18,7 @@ export default async function DocumentPage({ params }: PageProps) {
   
   return (
     <div className="min-h-screen p-4 bg-[#FAFBFD]">
+      <Navbar />
       <ToolBar/>
       <EditorPage />
     </div>  

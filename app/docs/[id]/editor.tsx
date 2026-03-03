@@ -15,8 +15,15 @@ import { Color } from '@tiptap/extension-color';
 import TextAlign from '@tiptap/extension-text-align';
 import Highlight from '@tiptap/extension-highlight';
 import Link from '@tiptap/extension-link';
+import Superscript from '@tiptap/extension-superscript';
+import Subscript from '@tiptap/extension-subscript';
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import { common, createLowlight } from 'lowlight';
 import { useEditorStore } from '@/store/use-editor-store';
 import { Extension } from '@tiptap/core';
+import { Ruler } from './ruler';
+
+const lowlight = createLowlight(common);
 
 // Custom FontSize Extension
 export type FontSizeOptions = {
@@ -80,10 +87,86 @@ const FontSize = Extension.create<FontSizeOptions>({
   },
 });
 
+// Custom LineHeight Extension
+export type LineHeightOptions = {
+  types: string[];
+  defaultLineHeight: string;
+};
+
+declare module '@tiptap/core' {
+  interface Commands<ReturnType> {
+    lineHeight: {
+      setLineHeight: (lineHeight: string) => ReturnType;
+      unsetLineHeight: () => ReturnType;
+    };
+  }
+}
+
+const LineHeight = Extension.create<LineHeightOptions>({
+  name: 'lineHeight',
+
+  addOptions() {
+    return {
+      types: ['paragraph', 'heading'],
+      defaultLineHeight: 'normal',
+    };
+  },
+
+  addGlobalAttributes() {
+    return [
+      {
+        types: this.options.types,
+        attributes: {
+          lineHeight: {
+            default: this.options.defaultLineHeight,
+            parseHTML: (element) => {
+              if (element.style.lineHeight) {
+                return element.style.lineHeight;
+              }
+              return this.options.defaultLineHeight;
+            },
+            renderHTML: (attributes) => {
+              if (
+                !attributes.lineHeight ||
+                attributes.lineHeight === this.options.defaultLineHeight
+              ) {
+                return {};
+              }
+              return {
+                style: `line-height: ${attributes.lineHeight}`,
+              };
+            },
+          },
+        },
+      },
+    ];
+  },
+
+  addCommands() {
+    return {
+      setLineHeight:
+        (lineHeight: string) =>
+        ({ commands }) => {
+          return this.options.types.every((type) =>
+            commands.updateAttributes(type, { lineHeight })
+          );
+        },
+      unsetLineHeight:
+        () =>
+        ({ commands }) => {
+          return this.options.types.every((type) =>
+            commands.resetAttributes(type, 'lineHeight')
+          );
+        },
+    };
+  },
+});
+
 export const EditorPage = () => {
   const { setEditor } = useEditorStore();
 
   const editor = useEditor({
+    immediatelyRender: false,
     onCreate({ editor }) { 
       setEditor(editor); 
     },
@@ -110,9 +193,8 @@ export const EditorPage = () => {
     },
     editorProps: {
       attributes: {
-        style: 'padding-left: 56px; padding-right: 56px;',
         class:
-          'focus:outline-none print:border-0 bg-white border border-[#c7c7c7] flex flex-col min-h-[1054px] w-[816px] pt-10 pr-14 pb-10 cursor-text shadow-lg print:shadow-none print:rounded-none print:mx-0 print:my-0 print:p-0 print:w-full print:min-h-0',
+          'focus:outline-none prose prose-sm max-w-none h-full',
       },
     },
     extensions: [
@@ -133,15 +215,51 @@ export const EditorPage = () => {
             class: 'list-decimal list-outside ml-6',
           },
         },
+        blockquote: {
+          HTMLAttributes: {
+            class: 'border-l-4 border-gray-300 pl-4 italic my-4 text-gray-700',
+          },
+        },
+        horizontalRule: {
+          HTMLAttributes: {
+            class: 'my-4 border-t-2 border-gray-300',
+          },
+        },
+        code: {
+          HTMLAttributes: {
+            class: 'bg-gray-100 text-red-600 px-1.5 py-0.5 rounded text-sm font-mono',
+          },
+        },
+        codeBlock: false,
         history: {
           depth: 100,
+        },
+      }),
+      CodeBlockLowlight.configure({
+        lowlight,
+        HTMLAttributes: {
+          class: 'bg-gray-900 text-gray-100 rounded-lg p-4 my-4 overflow-x-auto',
         },
       }),
       FontFamily,
       TextStyle,
       Color,
       FontSize,
+      LineHeight.configure({
+        types: ['paragraph', 'heading'],
+        defaultLineHeight: 'normal',
+      }),
       Underline,
+      Superscript.configure({
+        HTMLAttributes: {
+          class: 'align-super text-xs',
+        },
+      }),
+      Subscript.configure({
+        HTMLAttributes: {
+          class: 'align-sub text-xs',
+        },
+      }),
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
@@ -193,33 +311,32 @@ export const EditorPage = () => {
       }),
     ],
     content: `
-      <h1>Welcome to Your Document Editor</h1>
-      <p>This is a powerful document editor with many features:</p>
+      <h1>Welcome to Your Paginated Document Editor</h1>
+      <p>This editor works just like Google Docs with automatic page creation!</p>
       
-      <h2>Text Formatting</h2>
-      <p>You can make text <strong>bold</strong>, <em>italic</em>, <u>underlined</u>, or <s>strikethrough</s>.</p>
+      <h2>How It Works</h2>
+      <p>As you type and add content, the document automatically flows into new pages. Each page is a standard A4 size (816×1054 pixels).</p>
       
-      <h2>Lists</h2>
-      <p>Create different types of lists:</p>
+      <h2>Features</h2>
       <ul>
-        <li>Bullet list item 1</li>
-        <li>Bullet list item 2</li>
-        <li>Bullet list item 3</li>
+        <li>📄 Automatic page breaks when content exceeds page height</li>
+        <li>📊 Page numbers displayed at the bottom</li>
+        <li>🖨️ Print-ready layout</li>
+        <li>📝 Continuous editing experience</li>
       </ul>
       
-      <ol>
-        <li>Numbered list item 1</li>
-        <li>Numbered list item 2</li>
-        <li>Numbered list item 3</li>
-      </ol>
+      <h2>Try It Out!</h2>
+      <p>Start typing below and watch as new pages appear automatically. The content flows naturally from one page to the next.</p>
       
-      <h2>Task Lists</h2>
-      <ul data-type="taskList">
-        <li data-type="taskItem" data-checked="true">Completed task</li>
-        <li data-type="taskItem" data-checked="false">Pending task</li>
-      </ul>
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
       
-      <h2>Tables</h2>
+      <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+      
+      <blockquote>
+        "The best way to predict the future is to create it." - Peter Drucker
+      </blockquote>
+      
+      <h2>Tables and More</h2>
       <table>
         <tbody>
           <tr>
@@ -228,36 +345,115 @@ export const EditorPage = () => {
             <th>Status</th>
           </tr>
           <tr>
-            <td>Text Formatting</td>
-            <td>Bold, Italic, Underline</td>
-            <td>✓ Available</td>
+            <td>Multi-page</td>
+            <td>Automatic page creation</td>
+            <td>✓ Active</td>
           </tr>
           <tr>
-            <td>Links & Images</td>
-            <td>Insert links and images</td>
-            <td>✓ Available</td>
+            <td>Formatting</td>
+            <td>Rich text formatting</td>
+            <td>✓ Active</td>
           </tr>
           <tr>
-            <td>Alignment</td>
-            <td>Left, Center, Right, Justify</td>
-            <td>✓ Available</td>
+            <td>Tables</td>
+            <td>Full table support</td>
+            <td>✓ Active</td>
           </tr>
         </tbody>
       </table>
       
-      <p style="text-align: center">This text is centered</p>
-      <p style="text-align: right">This text is right-aligned</p>
-      
-      <h3>Start creating your document now!</h3>
-      <p>Click anywhere to start typing...</p>
+      <p>Keep typing to see more pages appear...</p>
     `,
   });
 
   return (
-    <div className="w-full overflow-x-auto bg-[#f9fbfd] px-4 py-8 print:p-0 print:bg-white print:overflow-visible">
-      <div className="min-w-max flex justify-center w-[816px] mx-auto print:w-full print:min-w-0">
-        <EditorContent editor={editor} />
+    <div className="w-full min-h-screen bg-[#f9fbfd] print:bg-white">
+      {/* Page container with Google Docs style */}
+          <Ruler/>
+      <div className="flex justify-center py-8 px-4 print:p-0">
+        <div className="flex flex-col gap-6 print:gap-0">
+          {/* Single continuous editor with page styling */}
+          <div className="relative">
+            {/* Page wrapper with shadows and borders */}
+            <div 
+              className="bg-white border border-[#c7c7c7] shadow-lg print:shadow-none print:border-0"
+              style={{
+                width: '816px',
+                minHeight: '1054px',
+                padding: '56px',
+              }}
+            >
+              <EditorContent editor={editor} />
+            </div>
+          </div>
+        </div>
       </div>
+      
+      {/* Page indicators using CSS - More realistic page breaks */}
+      <style jsx global>{`
+        @media screen {
+          .ProseMirror {
+            min-height: 942px;
+            /* Page break line appears at 1100px (allowing more content) */
+            background-image: 
+              repeating-linear-gradient(
+                to bottom,
+                transparent 0,
+                transparent 1098px,
+                #cbd5e1 1098px,
+                #cbd5e1 1100px,
+                transparent 1100px,
+                transparent 1174px
+              );
+            background-size: 100% 1174px;
+            background-position: 0 0;
+            padding-bottom: 80px;
+          }
+        }
+        
+        @media print {
+          @page {
+            size: A4;
+            margin: 0;
+          }
+          
+          body {
+            margin: 0;
+            padding: 0;
+          }
+          
+          .ProseMirror {
+            background-image: none;
+            page-break-after: auto;
+            padding-bottom: 0;
+          }
+          
+          /* Avoid breaking these elements across pages */
+          .ProseMirror > * {
+            page-break-inside: avoid;
+          }
+          
+          .ProseMirror h1,
+          .ProseMirror h2,
+          .ProseMirror h3 {
+            page-break-after: avoid;
+          }
+          
+          .ProseMirror table {
+            page-break-inside: avoid;
+          }
+          
+          .ProseMirror blockquote {
+            page-break-inside: avoid;
+          }
+          
+          /* Better orphan/widow control */
+          .ProseMirror p {
+            orphans: 3;
+            widows: 3;
+          }
+        }
+      `}</style>
     </div>
   );
 };
