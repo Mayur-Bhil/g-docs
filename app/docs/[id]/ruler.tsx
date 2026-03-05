@@ -125,7 +125,7 @@ export const Ruler = () => {
                 ref={rulerRef}
                 className="h-6 border-b border-gray-300 bg-white flex items-end relative select-none print:hidden overflow-hidden"
             >
-                <div className="w-full h-full relative flex justify-center">
+                <div className="w-full   h-full relative flex justify-center">
                     <div 
                         ref={contentRef}
                         className="relative h-full w-[816px]"

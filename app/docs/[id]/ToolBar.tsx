@@ -38,7 +38,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useEditorStore } from "@/store/use-editor-store";
 import { Separator } from "@/components/ui/separator";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { type ColorResult, CirclePicker } from "react-color";
 import { type Level } from "@tiptap/extension-heading";
 import { useCallback } from "react";
@@ -535,8 +535,8 @@ const ImageButton = () => {
       />
       
       {isOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setIsOpen(false)}>
-          <div className="bg-white rounded-lg shadow-xl w-[480px]" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 " onClick={() => setIsOpen(false)}>
+          <div className="bg-white rounded-lg shadow-xl w-[480px] " onClick={(e) => e.stopPropagation()}>
             <div className="px-5 pt-5 pb-3 border-b border-[#dadce0]">
               <h3 className="text-[#202124] text-base font-medium">Insert Image</h3>
             </div>
@@ -783,7 +783,7 @@ export const ToolBar = () => {
   const { editor } = useEditorStore();
 
   return (
-    <div className="bg-[#f9fbfd] px-2.5 py-1.5 min-h-[40px] flex items-center gap-0.5 overflow-x-auto border-b border-[#dadce0] print:hidden">
+    <div className="bg-[#f9fbfd] px-2.5 py-1.5 min-h-[40px] flex items-center gap-0.5 overflow-x-auto border-b border-[#dadce0] print:hidden rounded-lg scrollbar-hide">
       {/* Undo/Redo/Print */}
       <ToolBarButton
         onClick={() => editor?.chain().focus().undo().run()}
