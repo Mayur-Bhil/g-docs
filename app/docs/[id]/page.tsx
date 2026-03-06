@@ -1,5 +1,4 @@
 
-import { Nav } from "react-day-picker";
 import EditorPage from "./editor";
 import ToolBar from "./ToolBar";
 import { Navbar } from "./Navbar";

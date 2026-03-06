@@ -25,7 +25,6 @@ import {
   Columns,
   Rows,
   Plus,
-  Minus,
   Trash2,
   Code,
   Quote,
@@ -34,6 +33,7 @@ import {
   RemoveFormatting,
   Divide,
   MessageSquare,
+  Languages,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEditorStore } from "@/store/use-editor-store";
@@ -535,8 +535,8 @@ const ImageButton = () => {
       />
       
       {isOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 " onClick={() => setIsOpen(false)}>
-          <div className="bg-white rounded-lg shadow-xl w-[480px] " onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setIsOpen(false)}>
+          <div className="bg-white rounded-lg shadow-xl w-[480px]" onClick={(e) => e.stopPropagation()}>
             <div className="px-5 pt-5 pb-3 border-b border-[#dadce0]">
               <h3 className="text-[#202124] text-base font-medium">Insert Image</h3>
             </div>
@@ -779,6 +779,35 @@ const CommentButton = () => {
   );
 };
 
+const SpellCheckButton = () => {
+  const { editor } = useEditorStore();
+  const [isEnabled, setIsEnabled] = React.useState(true);
+
+  const toggleSpellCheck = () => {
+    const proseMirror = document.querySelector('.ProseMirror') as HTMLElement;
+    if (proseMirror) {
+      const newState = !isEnabled;
+      proseMirror.spellcheck = newState;
+      proseMirror.setAttribute('spellcheck', String(newState));
+      setIsEnabled(newState);
+      editor?.chain().focus().run();
+    }
+  };
+
+  return (
+    <button
+      onClick={toggleSpellCheck}
+      className={cn(
+        "h-7 min-w-7 flex items-center justify-center rounded-sm hover:bg-[#d3e3fd] transition-colors px-1.5",
+        isEnabled && "bg-[#c2e7ff]"
+      )}
+      title={isEnabled ? "Spell check enabled" : "Spell check disabled"}
+    >
+      <Languages className="w-4 h-4 text-[#444746]" />
+    </button>
+  );
+};
+
 export const ToolBar = () => {
   const { editor } = useEditorStore();
 
@@ -871,11 +900,12 @@ export const ToolBar = () => {
       
       <Separator orientation="vertical" className="h-4 w-px bg-[#dadce0] mx-1"/>
       
-      {/* Link, Image, Table & Comment */}
+      {/* Link, Image, Table, Comment & Spell Check */}
       <LinkButton />
       <ImageButton />
       <TableButton />
       <CommentButton />
+      <SpellCheckButton />
       
       <Separator orientation="vertical" className="h-4 w-px bg-[#dadce0] mx-1"/>
       

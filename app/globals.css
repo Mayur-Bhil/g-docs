@@ -258,3 +258,7 @@
     scrollbar-width: none;
   }
 }
+
+/* #__next {
+  isolation: isolate;
+} */
