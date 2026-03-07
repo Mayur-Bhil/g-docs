@@ -1,7 +1,16 @@
+"use client";
+
+import { useQuery } from "convex/react";
+
+
 import Link from "next/link";
 import { Navbar } from "./Navbar";
+import { TemplatesGallery } from "./TemplatesGallery";
+import { api } from "../../convex/_generated/api";
+// D:\projects\g-docs\convex\_generated\api.js
 
 const Page = () => {
+  const documents = useQuery(api.documents.get);
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
 
@@ -13,26 +22,16 @@ const Page = () => {
       </div>
 
       {/* Hero Section */}
-      <main className="flex flex-1 items-center justify-center mt-16 px-6">
-        <div className="text-center max-w-2xl">
-
-          <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            Welcome to Quick-Docs
-          </h1>
-
-          <p className="text-lg text-gray-600 mb-10">
-            A collaborative document editor where you can write, edit and
-            share documents instantly.
-          </p>
-
-          <Link
-            href="/docs/123"
-            className="inline-block px-8 py-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
-          >
-            Start Writing
-          </Link>
-
-        </div>
+      <main className="mt-16 ">
+        <TemplatesGallery />
+        {
+          documents?.map((doc) => (
+            <div key={doc._id} className="p-4 bg-white rounded shadow mb-4">
+              <h2 className="text-lg font-semibold">{doc.name}</h2>
+              <p>{doc.content}</p>
+            </div>
+          ))
+        }
       </main>
     </div>
   );
