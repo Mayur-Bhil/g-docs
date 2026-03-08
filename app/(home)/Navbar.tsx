@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Search } from "lucide-react";
 import { SearchInput } from "./search-input";
+import { UserButton } from "@clerk/nextjs";
 
 export const Navbar = () => {
   return (
@@ -18,26 +19,12 @@ export const Navbar = () => {
           </Link>
         </div>
 
-      <div>
+        <div>
           <SearchInput/>          
          </div>
-        {/* Links */}
-        <div className="flex items-center gap-6">
-          <Link
-            href="/docs/123"
-            className="text-sm font-medium text-gray-600 hover:text-black transition"
-          >
-            Docs
-          </Link>
-
-          <Link
-            href="/about"
-            className="text-sm font-medium text-gray-600 hover:text-black transition"
-          >
-            About
-          </Link>
-        </div>
-
+ 
+     
+      <UserButton/>
       </div>
     </nav>
   );

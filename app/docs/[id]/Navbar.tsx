@@ -2,7 +2,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { DOcumentInput } from "./document.input";
+import { DocumentInput } from "./document.input";
 import { 
   Menubar, 
   MenubarContent, 
@@ -282,7 +282,7 @@ export const Navbar = () => {
                         <Image src={"/g-doc.svg"} alt="G-DOCS Logo" width={35} height={35}/>
                     </Link>
                     <div className="flex flex-col gap-1">
-                        <DOcumentInput />
+                        <DocumentInput />
                     </div>
                 </div>
             </nav>
@@ -297,7 +297,7 @@ export const Navbar = () => {
                </Link>
                <div className="flex flex-col gap-1">
                 {/* Document Inputs */}
-                <DOcumentInput />
+                <DocumentInput />
                 {/* Menu Bar */}
                 <Menubar className="border-none bg-transparent shadow-none h-auto p-0 ">
                     {/* File Menu */}
@@ -590,21 +590,7 @@ export const Navbar = () => {
                </div>
             </div>
 
-            {/* Right side - Collaboration/Settings */}
-            <div className="flex items-center gap-2">
-                <button 
-                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                    title="Collaborators"
-                >
-                    <Users className="h-5 w-5 text-gray-600"/>
-                </button>
-                <button 
-                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                    title="Settings"
-                >
-                    <Settings className="h-5 w-5 text-gray-600"/>
-                </button>
-            </div>
+           
         </nav>
     );
 };

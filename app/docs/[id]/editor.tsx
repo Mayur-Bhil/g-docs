@@ -310,60 +310,7 @@ export const EditorPage = () => {
         multicolor: true,
       }),
     ],
-    content: `
-      <h1>Welcome to Your Paginated Document Editor</h1>
-      <p>This editor works just like Google Docs with automatic page creation!</p>
-      
-      <h2>How It Works</h2>
-      <p>As you type and add content, the document automatically flows into new pages. Each page is a standard A4 size (816×1054 pixels).</p>
-      
-      <h2>Features</h2>
-      <ul>
-        <li>📄 Automatic page breaks when content exceeds page height</li>
-        <li>📊 Page numbers displayed at the bottom</li>
-        <li>🖨️ Print-ready layout</li>
-        <li>📝 Continuous editing experience</li>
-      </ul>
-      
-      <h2>Try It Out!</h2>
-      <p>Start typing below and watch as new pages appear automatically. The content flows naturally from one page to the next.</p>
-      
-      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-      
-      <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-      
-      <blockquote>
-        "The best way to predict the future is to create it." - Peter Drucker
-      </blockquote>
-      
-      <h2>Tables and More</h2>
-      <table>
-        <tbody>
-          <tr>
-            <th>Feature</th>
-            <th>Description</th>
-            <th>Status</th>
-          </tr>
-          <tr>
-            <td>Multi-page</td>
-            <td>Automatic page creation</td>
-            <td>✓ Active</td>
-          </tr>
-          <tr>
-            <td>Formatting</td>
-            <td>Rich text formatting</td>
-            <td>✓ Active</td>
-          </tr>
-          <tr>
-            <td>Tables</td>
-            <td>Full table support</td>
-            <td>✓ Active</td>
-          </tr>
-        </tbody>
-      </table>
-      
-      <p>Keep typing to see more pages appear...</p>
-    `,
+    content: ``,
   });
 
   return (

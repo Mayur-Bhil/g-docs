@@ -28,7 +28,7 @@ export const SearchInput = () => {
   );
 
   return (
-    <div className="flex-1 flex items-center justify-center px-4 max-w-4xl w-full mx-auto">
+    <div className="flex-1 flex items-center justify-center px-4 max-w-6xl w-full mx-auto">
       <form
         onSubmit={handleSubmit}
         className="relative w-full"
