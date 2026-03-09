@@ -1,5 +1,5 @@
-import { Doc } from "@/convex/_generated/dataModel"
-import { PaginationStatus } from "convex/react"
+import { Doc } from "@/convex/_generated/dataModel";
+import { PaginationStatus } from "convex/react";
 
 import {
     Table,
@@ -8,50 +8,89 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from "@/components/ui/table"
-import { LoaderIcon } from "lucide-react"
+} from "@/components/ui/table";
+import { LoaderIcon } from "lucide-react";
+import { DocumentRow } from "./DocumentRow";
+import { Button } from "@/components/ui/button";
 
 interface DocumentsTableProps {
-    documents : Doc<"documents">[] | undefined,
-    loadmore: (numItems: number) => void,
-    status:PaginationStatus
-
+    documents: Doc<"documents">[] | undefined;
+    loadmore: (numItems: number) => void;
+    status: PaginationStatus;
 }
-export const DocumentsTable  = ({
+
+export const DocumentsTable = ({
     documents,
     loadmore,
-    status
-}:DocumentsTableProps)=>{
-    return <div className="max-w-screen-xl mx-auto px-16 py-6 flex flex-col gap-5">
+    status,
+}: DocumentsTableProps) => {
+    return (
+        <div className="max-w-screen-xl mx-auto px-4 sm:px-8 md:px-16 py-4 sm:py-6 flex flex-col gap-2">
             {documents === undefined ? (
-                <div className="felx justify-center items-center h-24">
-                    <LoaderIcon className="animate-spin text-muted-foreground" size={24} />
+                <div className="flex justify-center items-center h-24">
+                    <LoaderIcon className="animate-spin text-[#5f6368]" size={20} />
                 </div>
-            ):(
-                    <Table>
-                        <TableHeader>
-                            <TableRow className="hover:bg-transparent border-none">
-                                <TableHead>Document Name</TableHead>
-                                <TableHead>&nbsp;</TableHead>
-                                <TableHead>Shared</TableHead>
-                                <TableHead>Created At</TableHead>
+            ) : (
+                <Table className="border-separate border-spacing-0">
+                    <TableHeader>
+                        <TableRow className="hover:bg-transparent border-none">
+                            {/* Icon column */}
+                            <TableHead className="w-8 sm:w-10 pr-2 pl-2 sm:pl-4" />
+
+                            {/* Name */}
+                            <TableHead className="text-xs font-medium text-[#5f6368] uppercase tracking-wide py-2 pr-4 sm:pr-8">
+                                Name
+                            </TableHead>
+
+                            {/* Shared — hidden on mobile */}
+                            <TableHead className="text-xs font-medium text-[#5f6368] uppercase tracking-wide py-2 w-[160px] hidden md:table-cell">
+                                Shared
+                            </TableHead>
+
+                            {/* Created — hidden on mobile */}
+                            <TableHead className="text-xs font-medium text-[#5f6368] uppercase tracking-wide py-2 w-[140px] hidden md:table-cell">
+                                Created
+                            </TableHead>
+
+                            {/* Actions */}
+                            <TableHead className="w-8 sm:w-10" />
+                        </TableRow>
+                    </TableHeader>
+
+                    {documents.length === 0 ? (
+                        <TableBody>
+                            <TableRow className="hover:bg-transparent">
+                                <TableCell
+                                    colSpan={5}
+                                    className="h-24 text-center text-sm text-[#5f6368]"
+                                >
+                                    No documents found.
+                                </TableCell>
                             </TableRow>
-                        </TableHeader>
-                        {documents.length === 0 ? (
-                            <TableBody>
-                                <TableRow className="hover:bg-transparent">
-                                    <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
-                                        No documents found.
-                                    </TableCell>
-                                </TableRow>
-                            </TableBody>
-                        ):(
-                            <TableBody>
-                                Documents
-                            </TableBody>  
-                        )}
-                    </Table>
+                        </TableBody>
+                    ) : (
+                        <TableBody>
+                            {documents.map((doc) => (
+                                <DocumentRow key={doc._id} document={doc} />
+                            ))}
+                        </TableBody>
+                    )}
+                </Table>
+            )}
+
+            {/* Load More */}
+            {documents && status === "CanLoadMore" && (
+                <div className="flex justify-center pt-4">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => loadmore(5)}
+                        className="text-[#1a73e8] hover:bg-[#f1f3f4] text-sm font-medium"
+                    >
+                        Load more
+                    </Button>
+                </div>
             )}
         </div>
-}   
-                                     
+    );
+};

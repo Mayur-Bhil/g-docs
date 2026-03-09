@@ -1,30 +1,30 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Search } from "lucide-react";
 import { SearchInput } from "./search-input";
 import { UserButton } from "@clerk/nextjs";
 
 export const Navbar = () => {
   return (
     <nav className="w-full border-b bg-white">
-      <div className="max-w-6xl mx-auto flex items-center justify-between h-16 px-auto">
+      <div className="flex items-center justify-between h-16 px-4 md:px-6 gap-3">
 
         {/* Logo */}
-        <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-2">
-            <Image src="/g-doc.svg" alt="logo" width={34} height={34} />
-            <span className="font-semibold text-lg text-gray-800">
-              Quick-Docs
-            </span>
-          </Link>
+        <Link href="/" className="flex items-center gap-2 shrink-0">
+          <Image src="/g-doc.svg" alt="logo" width={34} height={34} />
+          <span className="font-semibold text-lg text-gray-800 hidden sm:block">
+            Quick-Docs
+          </span>
+        </Link>
+
+        {/* Search — grows to fill space */}
+        <div className="flex-1 min-w-0">
+          <SearchInput />
         </div>
 
-        <div>
-          <SearchInput/>          
-         </div>
- 
-     
-      <UserButton/>
+        {/* User */}
+        <div className="shrink-0">
+          <UserButton />
+        </div>
       </div>
     </nav>
   );
