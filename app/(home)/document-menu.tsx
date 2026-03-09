@@ -1,6 +1,7 @@
 import { RemoveDailog } from "@/components/remove-dailog";
+import { RenameDailog } from "@/components/rename-dailog";
 import { Button } from "@/components/ui/button"
-import { MoreVertical, TrashIcon } from "lucide-react"
+import { FilePenIcon, MoreVertical, TrashIcon } from "lucide-react"
 import { Id } from "../../convex/_generated/dataModel"
 
 import {
@@ -30,6 +31,15 @@ export const DocumentMenu = ({ documentId, title, onNewTab }: DocumentMenuProps)
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 shadow-md border-[#e0e0e0]">
+                <RenameDailog documentId={documentId} initialTitle={title}>
+                    <DropdownMenuItem
+                    onSelect={(e)=>e.preventDefault()}
+                    onClick={(e)=>e.stopPropagation()}
+                    >
+                        <FilePenIcon className="size-4 mr-2"/>
+                        Rename
+                    </DropdownMenuItem>
+               </RenameDailog>
                <RemoveDailog documentId={documentId}>
                     <DropdownMenuItem
                     onSelect={(e)=>e.preventDefault()}
