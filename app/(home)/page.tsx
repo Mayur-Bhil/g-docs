@@ -5,9 +5,12 @@ import { Navbar } from "./Navbar";
 import { DocumentsTable } from "./DocumentsTable";
 import { TemplatesGallery } from "./TemplatesGallery";
 import { api } from "../../convex/_generated/api";
+import { useSearchParam } from "../hooks/use-search-params";
 
+// D:\projects\g-docs\app\hooks
 const Page = () => {
-  const { results, status, loadMore } = usePaginatedQuery(api.documents.get, {}, { initialNumItems: 10 });
+  const [search] = useSearchParam();
+  const { results, status, loadMore } = usePaginatedQuery(api.documents.get, {search}, { initialNumItems: 5 });
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">

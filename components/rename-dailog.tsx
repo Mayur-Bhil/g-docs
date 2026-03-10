@@ -48,7 +48,7 @@ export const RenameDailog = ({documentId,initialTitle,children}:renamDailogProps
             <DialogTrigger asChild>
                 {children}
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent onClick={(e)=>e.stopPropagation()} className="select-none">
                     <form onSubmit={onSubmit}>
                         <DialogHeader>
                                 <DialogTitle>Rename Document</DialogTitle>
