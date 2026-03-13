@@ -22,6 +22,8 @@ import { common, createLowlight } from 'lowlight';
 import { useEditorStore } from '@/store/use-editor-store';
 import { Extension } from '@tiptap/core';
 import { Ruler } from './ruler';
+import { useLiveblocksExtension} from "@liveblocks/react-tiptap";
+import { Threads } from './Threads';
 
 const lowlight = createLowlight(common);
 
@@ -163,6 +165,7 @@ const LineHeight = Extension.create<LineHeightOptions>({
 });
 
 export const EditorPage = () => {
+  const liveBlocks = useLiveblocksExtension();
   const { setEditor } = useEditorStore();
 
   const editor = useEditor({
@@ -198,7 +201,9 @@ export const EditorPage = () => {
       },
     },
     extensions: [
-      StarterKit.configure({
+        liveBlocks,
+        StarterKit.configure({
+        history:false,
         heading: {
           levels: [1, 2, 3, 4, 5],
           HTMLAttributes: {
@@ -231,9 +236,6 @@ export const EditorPage = () => {
           },
         },
         codeBlock: false,
-        history: {
-          depth: 100,
-        },
       }),
       CodeBlockLowlight.configure({
         lowlight,
@@ -269,7 +271,7 @@ export const EditorPage = () => {
       ImageResize.configure({
         inline: true,
         allowBase64: true,
-      }),
+      }), 
       Table.configure({ 
         resizable: true,
         HTMLAttributes: {
@@ -331,6 +333,11 @@ export const EditorPage = () => {
               }}
             >
               <EditorContent editor={editor} />
+              {editor && (
+                  <div suppressHydrationWarning>
+                    <Threads editor={editor}/>
+                  </div>
+               )}
             </div>
           </div>
         </div>

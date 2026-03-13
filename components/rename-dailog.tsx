@@ -19,6 +19,7 @@ import React, { useState } from "react"
 import { Input } from "./ui/input"
 import { Button } from "./ui/button"
 import { Flag, Ghost } from "lucide-react"
+import { toast } from "sonner"
 
 
 interface renamDailogProps {
@@ -35,14 +36,19 @@ export const RenameDailog = ({documentId,initialTitle,children}:renamDailogProps
     const [title,setTitle] = useState(initialTitle);
     const [open,setOpen] = useState(false);
 
-    const onSubmit = (e:React.FormEvent<HTMLFormElement>)=>{
-        e.preventDefault();
-        setIsUpdating(true);
-        updateByID({id:documentId,title:title.trim() || "Untitled"}).then(()=> setOpen(false)).finally(()=>{
-            setIsUpdating(false)
-           
-        })
-    }
+    const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  setIsUpdating(true);
+  updateByID({ id: documentId, title: title.trim() || "Untitled" })
+    .then(() => {
+      toast.success("Document renamed successfully");
+      setOpen(false);
+    })
+    .catch((error) => {
+      toast.error(error?.data ?? "Failed to rename document");
+    })
+    .finally(() => setIsUpdating(false));
+};
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>

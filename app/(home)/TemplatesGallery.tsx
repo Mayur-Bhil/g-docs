@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { api } from "@/convex/_generated/api";
 import React from "react";
+import { toast } from "sonner";
 
 const Templates = [
   { id: "blank",             label: "Blank",            imageUrl: "/blank-document.svg" },
@@ -28,18 +29,26 @@ export const TemplatesGallery = () => {
   const create = useMutation(api.documents.create);
   const [isCreating, setIsCreating] = React.useState(false);
 
-  const OnTemplateClicked = (title: string, initialContent: string) => async () => {
-    setIsCreating(true);
-    create({ title, initialContent }).then((documentId) => {
+const OnTemplateClicked = (title: string, initialContent: string) => async () => {
+  setIsCreating(true);
+  create({ title, initialContent })
+    .then((documentId) => {
+      toast.success(`${title} created successfully`);
       router.push(`/docs/${documentId}`);
-    }).catch((error) => {
-      console.error("Error creating document:", error);
-      setIsCreating(false);
-    }).finally(() => {
+    })
+    .catch((error) => {
+      const errorMessage = error?.data || error?.message || "";
+      if (errorMessage.includes("organization")) {
+        toast.error("You must be part of an organization to create documents.");
+      } else {
+        toast.error("Failed to create document.");
+      }
+    })
+    .finally(() => {
       setIsCreating(false);
     });
-  };
-
+};
+  
   return (
     <div className="bg-[#f1f3f4] select-none">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-8 md:px-16 py-4 sm:py-6 flex flex-col gap-y-4">

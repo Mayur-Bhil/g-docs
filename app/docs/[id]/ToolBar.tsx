@@ -42,6 +42,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/compon
 import { type ColorResult, CirclePicker } from "react-color";
 import { type Level } from "@tiptap/extension-heading";
 import { useCallback } from "react";
+import Image from '@tiptap/extension-image' 
+import { useCreateThread } from "@liveblocks/react";
 import * as React from "react";
 
 interface ToolBarButtonProps {
@@ -765,15 +767,16 @@ const TableButton = () => {
   );
 };
 
+// Add this import at the top with other imports
+
+// Replace the existing CommentButton with this:
 const CommentButton = () => {
-  const handleCommentClick = () => {
-    alert('💬 Comments Feature\n\nThis feature will be available soon in the toolbar!\n\nStay tuned for updates.');
-  };
+  const { editor } = useEditorStore();
 
   return (
     <ToolBarButton
-      onClick={handleCommentClick}
-      isActive={false}
+      onClick={() => editor?.chain().focus().addPendingComment().run()}
+      isActive={editor?.isActive("liveblocks-comment-mark")}
       icon={MessageSquare}
     />
   );

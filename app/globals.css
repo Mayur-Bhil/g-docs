@@ -262,3 +262,68 @@
 /* #__next {
   isolation: isolate;
 } */
+
+/* Toast — editorial ink style */
+.toast-success {
+  border-left: 4px solid #1a1a1a !important;
+  position: relative;
+}
+
+.toast-success::before {
+  content: "✓ OK";
+  position: absolute;
+  top: -1px;
+  right: 10px;
+  font-size: 9px;
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: #1a1a1a;
+  opacity: 0.4;
+  text-transform: uppercase;
+}
+
+.toast-error {
+  border-left: 4px solid #1a1a1a !important;
+  background: #1a1a1a !important;
+  color: #FFFDF5 !important;
+}
+
+.toast-error::before {
+  content: "✕ ERR";
+  position: absolute;
+  top: -1px;
+  right: 10px;
+  font-size: 9px;
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: #FFFDF5;
+  opacity: 0.4;
+  text-transform: uppercase;
+}
+
+
+/* For mobile */
+.floating-threads {
+  display: none;
+}
+
+/* For desktop */
+.anchored-threads {
+  display: block;
+  max-width: 300px;
+  width: 100%;
+  position: absolute;
+  right: 12px;
+}
+
+@media (max-width: 640px) {
+  .floating-threads {
+    display: block;
+  }
+
+  .anchored-threads {
+    display: none;
+  }
+}
