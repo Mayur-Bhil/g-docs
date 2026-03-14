@@ -2,11 +2,47 @@ import { paginationOptsValidator } from "convex/server";
 import { query, mutation } from "./_generated/server";
 import { ConvexError, v } from "convex/values";
 
-// ✅ NEW: needed by page.tsx to get the document's orgId server-side
 export const getById = query({
   args: { id: v.id("documents") },
   handler: async (ctx, args) => {
     return await ctx.db.get(args.id);
+  },
+});
+
+export const getByRoomId = query({
+  args: { roomId: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.auth.getUserIdentity();
+    if (!user) return null;
+
+    const document = await ctx.db
+      .query("documents")
+      .withIndex("by_room_id", (q) => q.eq("roomId", args.roomId))
+      .first();
+
+    if (!document) return null;
+
+    const organizationId = (user.organization_id ?? undefined) as string | undefined;
+    const isOwner = document.ownerId === user.subject;
+    const isOrgMember =
+      !!document.organizationId && document.organizationId === organizationId;
+
+    if (!isOwner && !isOrgMember) return null;
+
+    return document;
+  },
+});
+
+// ← added: used by resolveRoomsInfo in room.tsx to show doc title in notifications
+export const getByRoomIdPublic = query({
+  args: { roomId: v.string() },
+  handler: async (ctx, args) => {
+    const doc = await ctx.db
+      .query("documents")
+      .withIndex("by_room_id", (q) => q.eq("roomId", args.roomId))
+      .first();
+    if (!doc) return null;
+    return { _id: doc._id, title: doc.title };
   },
 });
 

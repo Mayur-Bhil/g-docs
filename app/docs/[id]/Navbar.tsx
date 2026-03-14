@@ -50,6 +50,7 @@ import {
 } from "lucide-react";
 import { useEditorStore } from "@/store/use-editor-store";
 import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
+import { InBox } from "./inbox";
 // ✅ FIX: Import Avatars so collaborative presence is visible in the editor
 import { Avatars } from "./avatar";
 
@@ -561,6 +562,7 @@ export const Navbar = () => {
       {/* ✅ FIX: Right side — Avatars + org switcher + user button */}
       <div className="shrink-0 flex items-center gap-3">
         {/* Collaborative avatars */}
+        <InBox/>
         <Avatars />
 
         <OrganizationSwitcher

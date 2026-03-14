@@ -8,12 +8,15 @@ import {
 } from "@liveblocks/react/suspense";
 import { getUsers, getUsersByIds } from "./actions";
 import { toast } from "sonner";
+import { useParams } from "next/navigation";
+import { api } from "@/convex/_generated/api";
+import { ConvexHttpClient } from "convex/browser";
+
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 interface RoomProps {
   children: ReactNode;
   roomId: string;
-  // orgId prop removed — getUsers() now finds the org via Clerk memberships API
-  // so we don't need to thread it through from the page
 }
 
 type User = {
@@ -25,6 +28,7 @@ type User = {
 
 export function Room({ children, roomId }: RoomProps) {
   const mentionUsersRef = useRef<User[]>([]);
+  const params = useParams();
 
   const fetchMentionUsers = useCallback(async () => {
     try {
@@ -46,6 +50,27 @@ export function Room({ children, roomId }: RoomProps) {
     []
   );
 
+  const resolveRoomsInfo = useCallback(
+    async ({ roomIds }: { roomIds: string[] }) => {
+      return await Promise.all(
+        roomIds.map(async (roomId) => {
+          try {
+            const doc = await convex.query(api.documents.getByRoomIdPublic, { roomId });
+            return {
+              name: doc?.title
+                ? doc.title.charAt(0).toUpperCase() + doc.title.slice(1)
+                : "Untitled Document",
+              url: doc ? `/documents/${doc._id}` : "/",
+            };
+          } catch {
+            return { name: "Untitled Document", url: "/" };
+          }
+        })
+      );
+    },
+    []
+  );
+
   const resolveMentionSuggestions = useCallback(
     ({ text }: { text: string }) => {
       const list = mentionUsersRef.current;
@@ -60,11 +85,20 @@ export function Room({ children, roomId }: RoomProps) {
   return (
     <LiveblocksProvider
       throttle={16}
-      authEndpoint="/api/liveblocks-auth"
+      authEndpoint={async () => {
+        const endpoint = "/api/liveblocks-auth";
+        const room = params.id as string;
+        const response = await fetch(endpoint, {
+          method: "POST",
+          body: JSON.stringify({ room }),
+        });
+        return await response.json();
+      }}
       resolveUsers={resolveUsers}
       resolveMentionSuggestions={resolveMentionSuggestions}
+      resolveRoomsInfo={resolveRoomsInfo}
     >
-      <RoomProvider id={roomId} initialPresence={{ cursor: null }}>
+      <RoomProvider id={roomId} initialPresence={{ cursor: null }} initialStorage={{leftMargin:56,rightMargin:56}}>
         <ClientSideSuspense
           fallback={
             <div className="min-h-screen flex items-center justify-center bg-[#FAFBFD]">
