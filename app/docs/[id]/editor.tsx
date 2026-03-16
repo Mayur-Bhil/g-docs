@@ -24,6 +24,10 @@ import { Extension } from '@tiptap/core';
 import { Ruler } from './ruler';
 import { useLiveblocksExtension } from "@liveblocks/react-tiptap";
 import { Threads } from './Threads';
+import { useMutation } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import { Id } from '@/convex/_generated/dataModel';
+import { useRef } from 'react';
 
 const lowlight = createLowlight(common);
 
@@ -105,26 +109,50 @@ const LineHeight = Extension.create<LineHeightOptions>({
 });
 
 // ── EditorPage ────────────────────────────────────────────────────────────────
-export const EditorPage = () => {
+interface EditorPageProps {
+  documentId: Id<"documents">;
+  initialContent: string;
+}
+
+export const EditorPage = ({ documentId, initialContent }: EditorPageProps) => {
   const liveBlocks = useLiveblocksExtension();
   const { setEditor, leftMargin, rightMargin } = useEditorStore();
+  const saveTimer = useRef<ReturnType<typeof setTimeout>>(null);
 
-  // ✅ Derive padding from store values (set by Ruler).
-  // Default is 56px on both sides when the ruler hasn't been touched.
+  const updateContent = useMutation(api.documents.updateContent);
+
   const paddingLeft = leftMargin ?? 56;
-  // rightMargin is the pixel position from the left edge of the 816px page.
-  // Padding-right = page width minus that position.
   const paddingRight = 816 - (rightMargin ?? 760);
 
   const editor = useEditor({
     immediatelyRender: false,
     onCreate({ editor }) { setEditor(editor); },
     onDestroy() { setEditor(null); },
-    onUpdate({ editor }) { setEditor(editor); },
+    onUpdate({ editor }) {
+      setEditor(editor);
+
+      // ── debounced save back to Convex ──
+      // Fires 3s after the user stops typing so we don't hammer the DB
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+      saveTimer.current = setTimeout(async () => {
+        const html = editor.getHTML();
+        try {
+          await updateContent({ id: documentId, initialContent: html });
+        } catch (e) {
+          console.error("Failed to save content to Convex:", e);
+        }
+      }, 3000);
+    },
     onSelectionUpdate({ editor }) { setEditor(editor); },
     onTransaction({ editor }) { setEditor(editor); },
     onFocus({ editor }) { setEditor(editor); },
-    onBlur({ editor }) { setEditor(editor); },
+    onBlur({ editor }) {
+      setEditor(editor);
+      // ── also save immediately on blur (tab switch, close, etc.) ──
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+      const html = editor.getHTML();
+      updateContent({ id: documentId, initialContent: html }).catch(console.error);
+    },
     onContentError({ error }) { console.error('Editor content error:', error); },
     editorProps: {
       attributes: {
@@ -169,7 +197,8 @@ export const EditorPage = () => {
       TextAlign.configure({ types: ['heading', 'paragraph'], defaultAlignment: 'left' }),
       Highlight.configure({ multicolor: true }),
     ],
-    content: ``,
+    // ✅ Load saved content from Convex on open
+    content: initialContent || ``,
   });
 
   return (
@@ -178,9 +207,6 @@ export const EditorPage = () => {
       <div className="flex justify-center py-8 px-4 print:p-0">
         <div className="flex flex-col gap-6 print:gap-0">
           <div className="relative">
-            {/* ✅ Page padding is now driven by leftMargin/rightMargin from the store.
-                The outer div keeps the fixed 816px width; inner padding shifts the
-                content area exactly where the ruler markers are. */}
             <div
               className="bg-white border border-[#c7c7c7] shadow-lg print:shadow-none print:border-0"
               style={{

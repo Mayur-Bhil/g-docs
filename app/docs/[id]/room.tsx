@@ -8,7 +8,6 @@ import {
 } from "@liveblocks/react/suspense";
 import { getUsers, getUsersByIds } from "./actions";
 import { toast } from "sonner";
-import { useParams } from "next/navigation";
 import { api } from "@/convex/_generated/api";
 import { ConvexHttpClient } from "convex/browser";
 
@@ -16,7 +15,7 @@ const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 interface RoomProps {
   children: ReactNode;
-  roomId: string;
+  roomId: string; // ✅ restored — passed from document.tsx
 }
 
 type User = {
@@ -28,7 +27,6 @@ type User = {
 
 export function Room({ children, roomId }: RoomProps) {
   const mentionUsersRef = useRef<User[]>([]);
-  const params = useParams();
 
   const fetchMentionUsers = useCallback(async () => {
     try {
@@ -87,10 +85,9 @@ export function Room({ children, roomId }: RoomProps) {
       throttle={16}
       authEndpoint={async () => {
         const endpoint = "/api/liveblocks-auth";
-        const room = params.id as string;
         const response = await fetch(endpoint, {
           method: "POST",
-          body: JSON.stringify({ room }),
+          body: JSON.stringify({ room: roomId }),
         });
         return await response.json();
       }}
@@ -98,7 +95,11 @@ export function Room({ children, roomId }: RoomProps) {
       resolveMentionSuggestions={resolveMentionSuggestions}
       resolveRoomsInfo={resolveRoomsInfo}
     >
-      <RoomProvider id={roomId} initialPresence={{ cursor: null }} initialStorage={{leftMargin:56,rightMargin:56}}>
+      <RoomProvider
+        id={roomId}
+        initialPresence={{ cursor: null }}
+        initialStorage={{ leftMargin: 56, rightMargin: 760 }}
+      >
         <ClientSideSuspense
           fallback={
             <div className="min-h-screen flex items-center justify-center bg-[#FAFBFD]">

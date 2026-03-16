@@ -1,28 +1,29 @@
-import { Room } from "./room";
-import EditorPage from "./editor";
-import ToolBar from "./ToolBar";
-import { Navbar } from "./Navbar";
+import { auth } from "@clerk/nextjs/server";
+import { preloadQuery } from "convex/nextjs";
+import { Id } from "@/convex/_generated/dataModel";
+import { Document } from "./document";
+import { api } from "@/convex/_generated/api";
 
-type PageProps = {
-  params: Promise<{ id: string }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+interface DocumentIdProps {
+  params: Promise<{ id: Id<"documents"> }>;
+}
+
+const DocumentIdPage = async ({ params }: DocumentIdProps) => {
+  const { id } = await params;
+  const { getToken } = await auth();
+  const token = await getToken({ template: "convex" }) ?? undefined;
+
+  if (!token) {
+    throw new Error("Unauthorized");
+  }
+
+  const preloadedDocument = await preloadQuery(
+    api.documents.getById,
+    { id },
+    { token }
+  );
+
+  return <Document preLoadedDocument={preloadedDocument} />;
 };
 
-export default async function Page({ params }: PageProps) {
-  const { id } = await params;
-
-  // No need to pass orgId — Room/getUsers resolves it via Clerk memberships
-  return (
-    <Room roomId={id}>
-      <div className="min-h-screen p-4 bg-[#FAFBFD]">
-        <div className="flex flex-col px-4 pt-2 gap-y-2 fixed top-0 left-0 right-0 z-10 bg-[#FAFBFD] print:hidden h-[112px]">
-          <Navbar />
-          <ToolBar />
-        </div>
-        <div className="pt-[114px] print:pt-0">
-          <EditorPage />
-        </div>
-      </div>
-    </Room>
-  );
-}
+export default DocumentIdPage;

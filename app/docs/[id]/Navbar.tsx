@@ -53,8 +53,13 @@ import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
 import { InBox } from "./inbox";
 // ✅ FIX: Import Avatars so collaborative presence is visible in the editor
 import { Avatars } from "./avatar";
+import { Doc } from "@/convex/_generated/dataModel";
 
-export const Navbar = () => {
+interface Navbarprops {
+  data:Doc<"documents">
+};
+
+export const Navbar = ({data}:Navbarprops) => {
   const { editor } = useEditorStore();
   const [isSpellCheckEnabled, setIsSpellCheckEnabled] = React.useState(true);
   const [isMounted, setIsMounted] = React.useState(false);
@@ -82,7 +87,7 @@ export const Navbar = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "document.json";
+    a.download = `${document.title}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -93,7 +98,7 @@ export const Navbar = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "document.html";
+    a.download =  `${document.title}.html`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -104,7 +109,7 @@ export const Navbar = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "document.txt";
+    a.download =  `${document.title}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -226,7 +231,7 @@ export const Navbar = () => {
           <Link href="/">
             <Image src="/g-doc.svg" alt="G-DOCS Logo" width={35} height={35} />
           </Link>
-          <DocumentInput />
+          <DocumentInput title={data.title} id={data._id} />
         </div>
       </nav>
     );
@@ -241,7 +246,7 @@ export const Navbar = () => {
         </Link>
 
         <div className="flex flex-col gap-1">
-          <DocumentInput />
+            <DocumentInput title={data.title} id={data._id} />
 
           <Menubar className="border-none bg-transparent shadow-none h-auto p-0">
             {/* File */}

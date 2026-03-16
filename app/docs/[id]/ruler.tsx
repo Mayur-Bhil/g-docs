@@ -2,7 +2,7 @@
 import { FaCaretDown } from "react-icons/fa";
 import React from "react";
 import { useEditorStore } from "@/store/use-editor-store";
-
+import { useMarginSync } from "./use-margin-sync";
 const markers = Array.from({ length: 83 }, (_, i) => i);
 
 const DEFAULT_LEFT_MARGIN = 56;
@@ -42,6 +42,7 @@ const Marker = ({
 export const Ruler = () => {
   // ✅ Read AND write margins through the global store so EditorPage stays in sync
   const { leftMargin, rightMargin, setLeftMargin, setRightMargin } = useEditorStore();
+  const { updateLeftMargin, updateRightMargin } = useMarginSync(); 
 
   const [isDraggingLeft, setIsDraggingLeft] = React.useState(false);
   const [isDraggingRight, setIsDraggingRight] = React.useState(false);
@@ -50,7 +51,7 @@ export const Ruler = () => {
   const contentRef = React.useRef<HTMLDivElement>(null);
 
   const handleLeftMouseDown = () => setIsDraggingLeft(true);
-  const handleRightMouseDown = () => setIsDraggingRight(true);
+  const handleRightMouseDown = () => setIsDraggingRight(true);  
 
   const handleMouseMove = React.useCallback(
     (e: MouseEvent) => {
@@ -61,13 +62,16 @@ export const Ruler = () => {
 
       if (isDraggingLeft) {
         const next = Math.min(Math.max(relativeX, 0), rightMargin - 100);
-        setLeftMargin(next); // ✅ updates store → editor re-renders with new padding
+        setLeftMargin(next);       // update local store immediately (smooth drag)
+        updateLeftMargin(next);    // ← broadcast to other users via Liveblocks
       } else if (isDraggingRight) {
         const next = Math.max(Math.min(relativeX, 816), leftMargin + 100);
         setRightMargin(next);
+        updateRightMargin(next);   // ← broadcast to other users via Liveblocks
       }
     },
-    [isDraggingLeft, isDraggingRight, leftMargin, rightMargin, setLeftMargin, setRightMargin]
+    [isDraggingLeft, isDraggingRight, leftMargin, rightMargin, 
+     setLeftMargin, setRightMargin, updateLeftMargin, updateRightMargin]
   );
 
   const handleMouseUp = React.useCallback(() => {
@@ -76,8 +80,14 @@ export const Ruler = () => {
   }, []);
 
   // ✅ Double-click resets to defaults (56px left, 56px right)
-  const handleDoubleClickLeft = () => setLeftMargin(DEFAULT_LEFT_MARGIN);
-  const handleDoubleClickRight = () => setRightMargin(DEFAULT_RIGHT_MARGIN);
+ const handleDoubleClickLeft = () => {
+    setLeftMargin(DEFAULT_LEFT_MARGIN);
+    updateLeftMargin(DEFAULT_LEFT_MARGIN); // ← add this
+  };
+  const handleDoubleClickRight = () => {
+    setRightMargin(DEFAULT_RIGHT_MARGIN);
+    updateRightMargin(DEFAULT_RIGHT_MARGIN); // ← add this
+  };
 
   // Guide line while dragging
   React.useEffect(() => {

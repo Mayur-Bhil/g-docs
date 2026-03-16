@@ -5,7 +5,11 @@ import { ConvexError, v } from "convex/values";
 export const getById = query({
   args: { id: v.id("documents") },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.id);
+    const document = await ctx.db.get(args.id); 
+    if(!document){
+      throw new ConvexError("Document not Found")
+    }
+    return document;
   },
 });
 
@@ -162,6 +166,28 @@ export const update = mutation({
 
     return await ctx.db.patch(args.id, {
       title: args.title.toLowerCase().trim(),
+    });
+  },
+});
+
+
+export const updateContent = mutation({
+  args: { id: v.id("documents"), initialContent: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.auth.getUserIdentity();
+    if (!user) throw new ConvexError("Unauthorized");
+
+    const document = await ctx.db.get(args.id);
+    if (!document) throw new ConvexError("Document not found");
+
+    const isOwner = document.ownerId === user.subject;
+    const organizationId = (user.organization_id ?? undefined) as string | undefined;
+    const isOrgMember = !!document.organizationId && document.organizationId === organizationId;
+
+    if (!isOwner && !isOrgMember) throw new ConvexError("Unauthorized");
+
+    return await ctx.db.patch(args.id, {
+      initialContent: args.initialContent,
     });
   },
 });
