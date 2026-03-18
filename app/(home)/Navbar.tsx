@@ -1,7 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { SearchInput } from "./search-input";
-import { UserButton,OrganizationSwitcher } from "@clerk/nextjs";
+import { UserButton, OrganizationSwitcher } from "@clerk/nextjs";
+import { NavbarCreateButton } from "./navbar-create-button";
 
 export const Navbar = () => {
   return (
@@ -16,21 +17,22 @@ export const Navbar = () => {
           </span>
         </Link>
 
-        {/* Search — grows to fill space */}
+        {/* Search */}
         <div className="flex-1 m-10">
           <SearchInput />
         </div>
 
-        {/* User */}
-        <div className="shrink-0 flex justify-between items-center">
+        {/* Right side */}
+        <div className="shrink-0 flex items-center gap-3">
+          <NavbarCreateButton />
           <OrganizationSwitcher
-              afterCreateOrganizationUrl={"/"}
-              afterLeaveOrganizationUrl={"/"}
-              afterSelectOrganizationUrl={"/"}
-              afterSelectPersonalUrl={"/"}
+            afterCreateOrganizationUrl="/"
+            afterLeaveOrganizationUrl="/"
+            afterSelectOrganizationUrl="/"
+            afterSelectPersonalUrl="/"
           />
-          <div className="ml-10">
-          <UserButton />
+          <div className="ml-2">
+            <UserButton />
           </div>
         </div>
       </div>

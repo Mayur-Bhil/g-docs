@@ -5,10 +5,8 @@ import { ConvexError, v } from "convex/values";
 export const getById = query({
   args: { id: v.id("documents") },
   handler: async (ctx, args) => {
-    const document = await ctx.db.get(args.id); 
-    if(!document){
-      throw new ConvexError("Document not Found")
-    }
+    const document = await ctx.db.get(args.id);
+    if (!document) throw new ConvexError("Document not Found");
     return document;
   },
 });
@@ -26,18 +24,19 @@ export const getByRoomId = query({
 
     if (!document) return null;
 
-    const organizationId = (user.organization_id ?? undefined) as string | undefined;
+    const organizationId = (user.organization_id ?? undefined) as
+      | string
+      | undefined;
     const isOwner = document.ownerId === user.subject;
     const isOrgMember =
-      !!document.organizationId && document.organizationId === organizationId;
+      !!document.organizationId &&
+      document.organizationId === organizationId;
 
     if (!isOwner && !isOrgMember) return null;
-
     return document;
   },
 });
 
-// ← added: used by resolveRoomsInfo in room.tsx to show doc title in notifications
 export const getByRoomIdPublic = query({
   args: { roomId: v.string() },
   handler: async (ctx, args) => {
@@ -59,18 +58,42 @@ export const create = mutation({
     const user = await ctx.auth.getUserIdentity();
     if (!user) throw new ConvexError("Unauthorized");
 
-    const organizationId = (user.organization_id ?? undefined) as string | undefined;
+    // ── subscription gate ──────────────────────────────────────────────
+    const sub = await ctx.db
+      .query("subscriptions")
+      .withIndex("by_user_id", (q) => q.eq("userId", user.subject))
+      .first();
+
+    const isPro =
+      sub?.plan === "pro" &&
+      (sub.status === "active" ||
+        sub.status === "trialing" ||
+        sub.status === "past_due");
+
+    if (!isPro) {
+      const docs = await ctx.db
+        .query("documents")
+        .withIndex("by_owner_id", (q) => q.eq("ownerId", user.subject))
+        .collect();
+
+      if (docs.length >= 10) {
+        throw new ConvexError("FREE_LIMIT_REACHED");
+      }
+    }
+    // ── end gate ───────────────────────────────────────────────────────
+
+    const organizationId = (user.organization_id ?? undefined) as
+      | string
+      | undefined;
     const title = (args.title || "Untitled Document").toLowerCase().trim();
 
-    const documentId = await ctx.db.insert("documents", {
+    return await ctx.db.insert("documents", {
       title,
       initialContent: args.initialContent ?? "",
       ownerId: user.subject,
       roomId: crypto.randomUUID(),
       organizationId,
     });
-
-    return documentId;
   },
 });
 
@@ -83,14 +106,18 @@ export const get = query({
     const user = await ctx.auth.getUserIdentity();
     if (!user) return { page: [], isDone: true, continueCursor: "" };
 
-    const organizationId = (user.organization_id ?? undefined) as string | undefined;
+    const organizationId = (user.organization_id ?? undefined) as
+      | string
+      | undefined;
     const normalizedSearch = search?.trim().toLowerCase();
 
     if (normalizedSearch && organizationId) {
       return await ctx.db
         .query("documents")
         .withSearchIndex("search_title", (q) =>
-          q.search("title", normalizedSearch).eq("organizationId", organizationId)
+          q
+            .search("title", normalizedSearch)
+            .eq("organizationId", organizationId)
         )
         .paginate(paginationOpts);
     }
@@ -129,13 +156,20 @@ export const remove = mutation({
     const document = await ctx.db.get(args.id);
     if (!document) throw new ConvexError("Document Not Found");
 
-    const organizationId = (user.organization_id ?? undefined) as string | undefined;
+    const organizationId = (user.organization_id ?? undefined) as
+      | string
+      | undefined;
     const isOwner = document.ownerId === user.subject;
 
-    if (document.organizationId && organizationId === document.organizationId) {
+    if (
+      document.organizationId &&
+      organizationId === document.organizationId
+    ) {
       const isAdmin = user.org_role === "org:admin";
       if (!isOwner && !isAdmin) {
-        throw new ConvexError("Only the document owner or an admin can delete this document");
+        throw new ConvexError(
+          "Only the document owner or an admin can delete this document"
+        );
       }
       return await ctx.db.delete(args.id);
     }
@@ -154,10 +188,15 @@ export const update = mutation({
     const document = await ctx.db.get(args.id);
     if (!document) throw new ConvexError("Document Not Found");
 
-    const organizationId = (user.organization_id ?? undefined) as string | undefined;
+    const organizationId = (user.organization_id ?? undefined) as
+      | string
+      | undefined;
     const isOwner = document.ownerId === user.subject;
 
-    if (document.organizationId && organizationId === document.organizationId) {
+    if (
+      document.organizationId &&
+      organizationId === document.organizationId
+    ) {
       const isAdmin = user.org_role === "org:admin";
       if (!isOwner && !isAdmin) throw new ConvexError("Unauthorized");
     } else if (!isOwner) {
@@ -170,7 +209,6 @@ export const update = mutation({
   },
 });
 
-
 export const updateContent = mutation({
   args: { id: v.id("documents"), initialContent: v.string() },
   handler: async (ctx, args) => {
@@ -181,8 +219,12 @@ export const updateContent = mutation({
     if (!document) throw new ConvexError("Document not found");
 
     const isOwner = document.ownerId === user.subject;
-    const organizationId = (user.organization_id ?? undefined) as string | undefined;
-    const isOrgMember = !!document.organizationId && document.organizationId === organizationId;
+    const organizationId = (user.organization_id ?? undefined) as
+      | string
+      | undefined;
+    const isOrgMember =
+      !!document.organizationId &&
+      document.organizationId === organizationId;
 
     if (!isOwner && !isOrgMember) throw new ConvexError("Unauthorized");
 

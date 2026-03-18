@@ -104,7 +104,7 @@ const InBoxMenu = () => {
                     <InboxNotification
                       inboxNotification={notification}
                       className="px-4 py-3 cursor-pointer"
-                      href={`/documents/${notification.roomId}`}
+                      href={`/docs/${notification.roomId}`}
                     />
                   </div>
 
