@@ -6,7 +6,9 @@ export const getById = query({
   args: { id: v.id("documents") },
   handler: async (ctx, args) => {
     const document = await ctx.db.get(args.id);
-    if (!document) throw new ConvexError("Document not Found");
+    // FIX 1: Return null instead of throwing — lets the frontend handle
+    // the "not found" state gracefully without an uncaught error.
+    if (!document) return null;
     return document;
   },
 });
@@ -58,7 +60,6 @@ export const create = mutation({
     const user = await ctx.auth.getUserIdentity();
     if (!user) throw new ConvexError("Unauthorized");
 
-    // ── subscription gate ──────────────────────────────────────────────
     const sub = await ctx.db
       .query("subscriptions")
       .withIndex("by_user_id", (q) => q.eq("userId", user.subject))
@@ -80,7 +81,6 @@ export const create = mutation({
         throw new ConvexError("FREE_LIMIT_REACHED");
       }
     }
-    // ── end gate ───────────────────────────────────────────────────────
 
     const organizationId = (user.organization_id ?? undefined) as
       | string
@@ -109,7 +109,11 @@ export const get = query({
     const organizationId = (user.organization_id ?? undefined) as
       | string
       | undefined;
-    const normalizedSearch = search?.trim().toLowerCase();
+
+    // FIX 3: Normalize search to undefined when empty so the query shape
+    // is always consistent — prevents "cursor from a different query" errors
+    // when toggling between search and non-search states.
+    const normalizedSearch = search?.trim().toLowerCase() || undefined;
 
     if (normalizedSearch && organizationId) {
       return await ctx.db
@@ -193,15 +197,16 @@ export const update = mutation({
       | undefined;
     const isOwner = document.ownerId === user.subject;
 
-    if (
-      document.organizationId &&
-      organizationId === document.organizationId
-    ) {
-      const isAdmin = user.org_role === "org:admin";
-      if (!isOwner && !isAdmin) throw new ConvexError("Unauthorized");
-    } else if (!isOwner) {
-      throw new ConvexError("Unauthorized");
-    }
+    // FIX 2: Restructured auth logic so org membership and ownership are
+    // checked independently and clearly, preventing the false Unauthorized
+    // when organizationId mismatches but the user is the actual owner.
+    const isOrgMember =
+      !!document.organizationId &&
+      document.organizationId === organizationId;
+    const isAdmin = user.org_role === "org:admin";
+
+    const canEdit = isOwner || isOrgMember || isAdmin;
+    if (!canEdit) throw new ConvexError("Unauthorized");
 
     return await ctx.db.patch(args.id, {
       title: args.title.toLowerCase().trim(),

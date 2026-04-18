@@ -21,7 +21,7 @@ import { Toaster } from "sonner";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en">  
       <body className={inter.className}>
         <NuqsAdapter>
           <ConvexClientProvider>
